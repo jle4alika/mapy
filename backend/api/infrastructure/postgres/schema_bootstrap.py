@@ -35,12 +35,12 @@ def _run_alembic_upgrade() -> None:
     ]
     subprocess.run(
         cmd,
-        cwd=_REPO_ROOT,
+        cwd=_BACKEND_ROOT,
         check=True,
         env={
             **os.environ,
             "PYTHONPATH": (
-                f"{_REPO_ROOT}:{_BACKEND_ROOT / 'api'}" f":{os.environ.get('PYTHONPATH', '')}"
+                f"{_BACKEND_ROOT}:{_BACKEND_ROOT / 'api'}" f":{os.environ.get('PYTHONPATH', '')}"
             ),
         },
     )

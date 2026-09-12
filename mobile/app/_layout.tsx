@@ -7,7 +7,7 @@ import { useTheme } from '../src/shared/ui/ThemeProvider';
 
 function RootNav() {
   const { colors, id } = useTheme();
-  const dark = id !== 'day';
+  const dark = id === 'midnight';
   return (
     <>
       <StatusBar style={dark ? 'light' : 'dark'} />

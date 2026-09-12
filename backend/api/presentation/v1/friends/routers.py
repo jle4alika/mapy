@@ -56,19 +56,15 @@ async def claim_invite(
     service: FriendsServiceDep,
 ) -> FriendDTO:
     friend = await service.claim_invite(user.id, inviter_username=body.username)
-    from infrastructure.realtime.connection_manager import connection_manager
+    from infrastructure.notifications.push import deliver_app_notification
 
-    await connection_manager.send_json(
+    await deliver_app_notification(
         friend.user_id,
-        {
-            "type": "notification",
-            "payload": {
-                "kind": "friend_accepted",
-                "title": "Новый друг",
-                "body": "Кто-то добавился по вашей ссылке",
-                "from_user_id": str(user.id),
-            },
-        },
+        preference="friend_requests",
+        kind="friend_accepted",
+        title="Новый друг",
+        body="Кто-то добавился по вашей ссылке",
+        data={"from_user_id": str(user.id)},
     )
     return friend
 
@@ -111,19 +107,18 @@ async def send_request(
         to_username=body.to_username,
         message=body.message,
     )
+    from infrastructure.notifications.push import deliver_app_notification
     from infrastructure.realtime.connection_manager import connection_manager
 
-    await connection_manager.send_json(
+    await deliver_app_notification(
         dto.to_user_id,
-        {
-            "type": "notification",
-            "payload": {
-                "kind": "friend_request",
-                "title": "Заявка в друзья",
-                "body": "Вам отправили заявку в друзья",
-                "request_id": str(dto.id),
-                "from_user_id": str(dto.from_user_id),
-            },
+        preference="friend_requests",
+        kind="friend_request",
+        title="Заявка в друзья",
+        body="Вам отправили заявку в друзья",
+        data={
+            "request_id": str(dto.id),
+            "from_user_id": str(dto.from_user_id),
         },
     )
     await connection_manager.send_json(
@@ -149,19 +144,17 @@ async def accept_request(
     service: FriendsServiceDep,
 ) -> FriendRequestDTO:
     dto = await service.accept(user.id, request_id)
-    from infrastructure.realtime.connection_manager import connection_manager
+    from infrastructure.notifications.push import deliver_app_notification
 
-    await connection_manager.send_json(
+    await deliver_app_notification(
         dto.from_user_id,
-        {
-            "type": "notification",
-            "payload": {
-                "kind": "friend_accepted",
-                "title": "Заявка принята",
-                "body": "Вас добавили в друзья",
-                "request_id": str(dto.id),
-                "from_user_id": str(dto.to_user_id),
-            },
+        preference="friend_requests",
+        kind="friend_accepted",
+        title="Заявка принята",
+        body="Вас добавили в друзья",
+        data={
+            "request_id": str(dto.id),
+            "from_user_id": str(dto.to_user_id),
         },
     )
     return dto

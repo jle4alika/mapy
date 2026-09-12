@@ -10,7 +10,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Mapy показывает вашу позицию друзьям на карте."
+        "NSLocationWhenInUseUsageDescription": "Mapy показывает вашу позицию друзьям на карте.",
+        "UIBackgroundModes": ["remote-notification"]
       }
     },
     "android": {
@@ -20,7 +21,13 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -42,6 +49,15 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "Mapy показывает вашу позицию друзьям на карте."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#0066FF",
+          "defaultChannel": "mapy-default",
+          "sounds": []
         }
       ],
       "expo-secure-store",

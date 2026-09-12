@@ -1,0 +1,22 @@
+# Web static (Expo export) → копируется в volume для nginx
+#
+#   build context = mobile/
+
+services:
+  web:
+    build:
+      context: ../../../mobile
+      dockerfile: Dockerfile
+      args:
+        EXPO_PUBLIC_API_URL: ${PUBLIC_APP_URL:-http://127.0.0.1}
+    image: mapy-web:latest
+    restart: "no"
+    volumes:
+      - web_static:/export
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "rm -rf /export/* /export/.[!.]* 2>/dev/null; cp -a /web/. /export/ && echo web-static-ready"
+    # one-shot: после копирования контейнер завершится (restart: no)
+
+volumes:
+  web_static:

@@ -33,6 +33,11 @@ WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
 COPY api ./api
+COPY alembic.ini ./alembic.ini
+COPY alembic ./alembic
+
+# Медиа на томе
+RUN mkdir -p /app/storage
 
 EXPOSE 8000
 

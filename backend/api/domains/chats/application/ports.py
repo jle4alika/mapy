@@ -177,6 +177,9 @@ class AbstractChatsService(ABC):
     async def list_member_ids(self, chat_id: UUID) -> list[UUID]: ...
 
     @abstractmethod
+    async def get_chat_kind(self, chat_id: UUID) -> str | None: ...
+
+    @abstractmethod
     async def send_message(
         self,
         user_id: UUID,

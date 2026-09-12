@@ -20,6 +20,7 @@ import {
   createShadow,
   radii,
   space,
+  webScrollProps,
 } from '../../../src/shared/ui';
 import { useTheme } from '../../../src/shared/ui/ThemeProvider';
 import { AppPage, useListContentStyle } from '../../../src/widgets/shell/AppPage';
@@ -67,6 +68,7 @@ export default function FriendsScreen() {
   return (
     <AppPage fullBleed>
       <FlatList
+        {...webScrollProps}
         data={friendsQuery.data ?? []}
         keyExtractor={(item) => item.user_id}
         contentContainerStyle={listStyle}

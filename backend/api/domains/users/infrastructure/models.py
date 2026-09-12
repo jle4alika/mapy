@@ -70,3 +70,26 @@ class UserNotificationSettingsModel(Base):
     place_chat_activity: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     friend_arrived: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     system: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+
+class UserDeviceModel(Base):
+    """Устройство для push (Expo Push Token)."""
+
+    __tablename__ = "user_devices"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    expo_push_token: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    platform: Mapped[str] = mapped_column(String(16), nullable=False, default="unknown")
+    device_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=True)

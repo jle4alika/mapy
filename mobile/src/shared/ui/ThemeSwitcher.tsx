@@ -1,14 +1,18 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Icon, type IconName } from './Icon';
 import { useTheme } from './ThemeProvider';
-import { THEME_ORDER, type ThemeId, radii, space, typography } from './theme';
+import { THEME_ORDER, THEMES, type ThemeId, radii, space, typography } from './theme';
 import { Typography } from './Typography';
 
-const SWATCH: Record<ThemeId, [string, string]> = {
-  day: ['#F1F2F4', '#0066FF'],
-  midnight: ['#121212', '#4C8DFF'],
-  aurora: ['#0D0F12', '#5B9CFF'],
+const THEME_META: Record<
+  ThemeId,
+  { icon: IconName; color: string; activeBg: string }
+> = {
+  day: { icon: 'sun', color: '#E8A017', activeBg: 'rgba(232,160,23,0.12)' },
+  midnight: { icon: 'moon', color: '#7B8CFF', activeBg: 'rgba(123,140,255,0.16)' },
+  aurora: { icon: 'layers', color: '#0066FF', activeBg: 'rgba(0,102,255,0.10)' },
 };
 
 type Props = {
@@ -23,30 +27,42 @@ export function ThemeSwitcher({ compact }: Props) {
       <View style={[styles.row, { backgroundColor: colors.surfaceMuted }]}>
         {THEME_ORDER.map((themeId) => {
           const active = themeId === id;
-          const [a, b] = SWATCH[themeId];
-          const label =
-            themeId === 'day' ? 'День' : themeId === 'midnight' ? 'Ночь' : 'Контраст';
+          const meta = THEME_META[themeId];
+          const label = THEMES[themeId].label;
           return (
             <Pressable
               key={themeId}
               accessibilityRole="tab"
               accessibilityState={{ selected: active }}
+              accessibilityLabel={label}
               onPress={() => setTheme(themeId)}
               style={[
                 styles.item,
                 active && {
                   backgroundColor: colors.surface,
+                  borderColor: meta.color,
+                  borderWidth: StyleSheet.hairlineWidth,
                 },
               ]}
             >
-              <View style={styles.swatches}>
-                <View style={[styles.dot, { backgroundColor: a, borderColor: colors.border }]} />
-                <View style={[styles.dot, { backgroundColor: b, borderColor: colors.border }]} />
+              <View
+                style={[
+                  styles.iconWrap,
+                  { backgroundColor: active ? meta.activeBg : 'transparent' },
+                ]}
+              >
+                <Icon
+                  name={meta.icon}
+                  pack="fi"
+                  size={18}
+                  color={active ? meta.color : colors.inkMuted}
+                />
               </View>
               <Typography
                 variant="caption"
                 color={active ? colors.ink : colors.inkMuted}
                 style={styles.label}
+                numberOfLines={1}
               >
                 {label}
               </Typography>
@@ -77,15 +93,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     borderRadius: radii.sm,
-  },
-  swatches: { flexDirection: 'row', gap: 4 },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 3,
     borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'transparent',
   },
-  label: { ...typography.caption },
+  iconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: { ...typography.caption, fontSize: 12 },
 });

@@ -8,7 +8,7 @@ import { useMapUiStore } from '../../features/map/map-ui-store';
 import { useMapCameraStore } from '../../features/presence/map-camera-store';
 import { chatsApi, mapApi, profileApi } from '../../shared/api/endpoints';
 import { formatFriendPresence } from '../../features/presence/friendPresence';
-import { Avatar, Icon, type IconName, Typography, fonts, radii, space } from '../../shared/ui';
+import { Avatar, Icon, type IconName, Typography, fonts, radii, space, webScrollProps } from '../../shared/ui';
 import { useTheme } from '../../shared/ui/ThemeProvider';
 import { showError } from '../../features/notifications/toast-store';
 import { PlaceCard } from './PlaceCard';
@@ -212,6 +212,7 @@ export function MapDesktopPanel() {
   if (selectedPlace) {
     return (
       <ScrollView
+        {...webScrollProps}
         style={[styles.root, { backgroundColor: colors.surface }]}
         contentContainerStyle={styles.pad}
         keyboardShouldPersistTaps="handled"
@@ -252,6 +253,7 @@ export function MapDesktopPanel() {
     ];
     return (
       <FlatList
+        {...webScrollProps}
         style={[styles.root, { backgroundColor: colors.surface }]}
         contentContainerStyle={styles.pad}
         data={rows}
@@ -308,6 +310,7 @@ export function MapDesktopPanel() {
 
   return (
     <FlatList
+      {...webScrollProps}
       style={[styles.root, { backgroundColor: colors.surface }]}
       contentContainerStyle={styles.pad}
       data={viewportPlaces}

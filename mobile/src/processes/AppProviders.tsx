@@ -28,6 +28,7 @@ import { useSessionStore } from '../features/auth/session-store';
 import { useOutboxStore } from '../features/chat/outbox-store';
 import { showError } from '../features/notifications/toast-store';
 import { GatewayProvider } from '../features/realtime/GatewayProvider';
+import { usePushBootstrap } from '../features/notifications/usePushBootstrap';
 import { useThemeStore } from '../features/theme/theme-store';
 import { ThemeProvider } from '../shared/ui/ThemeProvider';
 import { ToastHost } from '../widgets/system/ToastHost';
@@ -64,6 +65,11 @@ function onAppStateChange(status: string) {
   if (Platform.OS !== 'web') {
     focusManager.setFocused(status === 'active');
   }
+}
+
+function PushBootstrapHost({ children }: { children: React.ReactNode }) {
+  usePushBootstrap();
+  return <>{children}</>;
 }
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
@@ -128,7 +134,9 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     >
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <GatewayProvider>{children}</GatewayProvider>
+          <PushBootstrapHost>
+            <GatewayProvider>{children}</GatewayProvider>
+          </PushBootstrapHost>
           <ToastHost />
         </ThemeProvider>
       </QueryClientProvider>

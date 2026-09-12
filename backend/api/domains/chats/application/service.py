@@ -338,6 +338,10 @@ class ChatsService(AbstractChatsService):
     async def list_member_ids(self, chat_id: UUID) -> list[UUID]:
         return await self._uow.chats.list_member_ids(chat_id)
 
+    async def get_chat_kind(self, chat_id: UUID) -> str | None:
+        chat = await self._uow.chats.get_chat(chat_id)
+        return chat.kind if chat else None
+
     async def send_message(
         self,
         user_id: UUID,

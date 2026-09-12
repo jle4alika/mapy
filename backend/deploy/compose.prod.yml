@@ -1,19 +1,21 @@
-# Prod: полный стек
+# Prod: полный стек (API + web + infra)
 #
-#   docker compose --env-file .env -f deploy/compose.prod.yml up --build -d
+# Из каталога backend/:
+#   PUBLIC_APP_URL=http://YOUR_IP docker compose --env-file .env -f deploy/compose.prod.yml up --build -d
 #
 # Публично ТОЛЬКО nginx :80
-#   API          → http://host/
+#   Web UI       → http://host/
+#   API          → http://host/api/
 #   Grafana      → http://host/grafana/
-# Postgres на хост — только 127.0.0.1 (миграции с сервера).
 
-name: fastapi-architecture
+name: mapy
 
 include:
   - path: services/postgres.yml
   - path: services/redis.yml
   - path: services/rabbitmq.yml
   - path: services/app.yml
+  - path: services/web.yml
   - path: services/nginx.yml
   - path: services/monitoring.yml
 
@@ -23,15 +25,18 @@ x-app-env: &app-env
   DB_DIRECT_HOST: db
   DB_DIRECT_PORT: "5432"
   DB_USE_PGBOUNCER: "true"
+  DB_MIGRATE_ON_STARTUP: "true"
   REDIS_HOST: redis_container
   REDIS_OPTIONAL: "false"
   RMQ_HOST: rabbitmq
   ENVIRONMENT: production
   TRUST_PROXY_HEADERS: "true"
+  STORAGE_ROOT: /app/storage
+  STORAGE_PUBLIC_BASE_URL: ${PUBLIC_APP_URL:-http://127.0.0.1}/media
+  CORS_ORIGINS: ${PUBLIC_APP_URL:-http://127.0.0.1}
 
 services:
   db:
-    # Не публикуем в LAN/интернет — только localhost хоста
     ports:
       - "127.0.0.1:${POSTGRES_PUBLISHED_PORT:-5433}:5432"
     volumes:
@@ -55,24 +60,39 @@ services:
   api:
     environment:
       <<: *app-env
+    volumes:
+      - api_storage:/app/storage
     command: >
       uvicorn api.app:app
       --host 0.0.0.0 --port 8000
       --proxy-headers --forwarded-allow-ips="*"
-      --workers ${API_WORKERS:-4}
+      --workers ${API_WORKERS:-2}
 
   consumers:
     environment:
       <<: *app-env
+    volumes:
+      - api_storage:/app/storage
 
   celery_worker:
-    # профиль celery — в services/app.yml; включение: COMPOSE_PROFILES=celery
     environment:
       <<: *app-env
+    volumes:
+      - api_storage:/app/storage
 
   nginx:
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_completed_successfully
+      grafana:
+        condition: service_started
     volumes:
       - ./configs/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - web_static:/usr/share/nginx/html:ro
 
 volumes:
   redis_data:
+  api_storage:
+  web_static:

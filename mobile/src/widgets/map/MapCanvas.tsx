@@ -220,7 +220,19 @@ function buildHtml(
     favoriteIds?: string[];
   },
   themeId: ThemeId,
-  pins: { friend: string; me: string; place: string; canvas: string; ink: string; surface: string },
+  pins: {
+    friend: string;
+    me: string;
+    place: string;
+    canvas: string;
+    ink: string;
+    surface: string;
+    labelInk: string;
+    labelHalo: string;
+    labelHaloW: number;
+    markerStroke: string;
+    darkMap: boolean;
+  },
 ) {
   const data = JSON.stringify(payload);
   const styleJson = buildMapStyleJson(themeId);
@@ -230,6 +242,11 @@ function buildHtml(
   const typeColorsJson = JSON.stringify(
     Object.fromEntries(Object.entries(PLACE_TYPE_META).map(([k, v]) => [k, v.color])),
   );
+  const labelInk = pins.labelInk;
+  const labelHalo = pins.labelHalo;
+  const labelHaloW = pins.labelHaloW;
+  const markerStroke = pins.markerStroke;
+  const attribColor = pins.darkMap ? '#C5D0DA' : '#21201F';
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -241,7 +258,7 @@ function buildHtml(
 <style>
   html, body, #map { margin:0; height:100%; width:100%; background:${pins.canvas}; }
   .maplibregl-ctrl-attrib { font-size:10px; opacity:.55; font-family: Manrope, system-ui, sans-serif; }
-  .maplibregl-ctrl-attrib a { color:#21201F; }
+  .maplibregl-ctrl-attrib a { color:${attribColor}; }
   .maplibregl-ctrl-group {
     border-radius:10px !important;
     overflow:hidden;
@@ -258,7 +275,7 @@ function buildHtml(
   .marker { display:flex; flex-direction:column; align-items:center; cursor:pointer; }
   .pin {
     width:28px; height:28px; border-radius:50%;
-    border:1.5px solid #fff; box-shadow:0 1px 2px rgba(0,0,0,.22);
+    border:1.5px solid ${markerStroke}; box-shadow:0 1px 2px rgba(0,0,0,.22);
     object-fit:cover; background:${pins.friend}; color:#fff;
     font:600 11px Manrope, system-ui, -apple-system, sans-serif;
     display:flex; align-items:center; justify-content:center;
@@ -492,6 +509,11 @@ function buildHtml(
   const OMT_CLASS_TO_TYPE = ${omtMap};
   const OMT_CLASS_COLOR = ${omtClassColor};
   const TYPE_COLORS = ${typeColorsJson};
+  const LABEL_INK = ${JSON.stringify(labelInk)};
+  const LABEL_HALO = ${JSON.stringify(labelHalo)};
+  const LABEL_HALO_W = ${labelHaloW};
+  const MARKER_STROKE = ${JSON.stringify(markerStroke)};
+  const THEME_ID = ${JSON.stringify(themeId)};
   function isBadPlaceName(name){
     var raw = String(name || '').trim();
     if (!raw) return true;
@@ -1073,7 +1095,7 @@ function buildHtml(
           ],
           'circle-color': '#F5C400',
           'circle-stroke-width': 1.8,
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-color': MARKER_STROKE,
           'circle-opacity': [
             'interpolate', ['linear'], ['zoom'],
             7, 0,
@@ -1117,9 +1139,9 @@ function buildHtml(
             13.8, 0,
             14.2, 1
           ],
-          'text-color': '#1A1A1A',
-          'text-halo-color': '#ffffff',
-          'text-halo-width': 1.2,
+          'text-color': LABEL_INK,
+          'text-halo-color': LABEL_HALO,
+          'text-halo-width': LABEL_HALO_W,
           'icon-opacity-transition': { duration: 420 },
           'text-opacity-transition': { duration: 360 }
         }
@@ -1150,7 +1172,7 @@ function buildHtml(
             TYPE_COLORS.custom
           ],
           'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-color': MARKER_STROKE,
           'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.35, 0.72, 11, 0.9, 12.2, 0.95, 12.6, 0],
           'circle-blur': ['interpolate', ['linear'], ['zoom'], 8, 0.15, 11, 0],
           'circle-radius-transition': { duration: 360 },
@@ -1191,9 +1213,9 @@ function buildHtml(
             15.2, 0,
             15.55, 1
           ],
-          'text-color': '#1A1A1A',
-          'text-halo-color': '#ffffff',
-          'text-halo-width': 1.2,
+          'text-color': LABEL_INK,
+          'text-halo-color': LABEL_HALO,
+          'text-halo-width': LABEL_HALO_W,
           'icon-opacity-transition': { duration: 450 },
           'text-opacity-transition': { duration: 380 }
         }
@@ -1270,6 +1292,95 @@ function buildHtml(
     });
   }
 
+  function setPaintSafe(id, prop, value){
+    try {
+      if (!map.getLayer(id)) return;
+      map.setPaintProperty(id, prop, value);
+    } catch (e) {}
+  }
+
+  /** Тёмная = чистый инверт светлой: земля тёмная, вода чуть синее, здания мягкие, дороги читаемые. */
+  function tuneBasemapStructure(){
+    if (THEME_ID !== 'midnight') return;
+    try {
+      setPaintSafe('background', 'background-color', '#121416');
+      setPaintSafe('water', 'fill-color', '#1A2433');
+      setPaintSafe('waterway', 'line-color', '#243447');
+      setPaintSafe('landuse_residential', 'fill-color', '#15171A');
+      setPaintSafe('landuse_park', 'fill-color', '#161A16');
+      setPaintSafe('landcover_wood', 'fill-color', '#141814');
+      // Здания: без яркой сетки контуров при зуме (как в Positron — масса, не wireframe)
+      setPaintSafe('building', 'fill-color', '#1C2026');
+      setPaintSafe('building', 'fill-outline-color', '#1C2026');
+      setPaintSafe('building', 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        13, 0.35,
+        15, 0.55,
+        17, 0.72
+      ]);
+      // Дороги: иерархия как в светлой, только инвертированные серые
+      setPaintSafe('highway_path', 'line-color', '#2A3038');
+      setPaintSafe('highway_minor', 'line-color', '#3E4652');
+      setPaintSafe('highway_minor', 'line-opacity', 1);
+      setPaintSafe('highway_major_casing', 'line-color', '#0E1012');
+      setPaintSafe('highway_major_inner', 'line-color', '#545C6A');
+      setPaintSafe('highway_major_subtle', 'line-color', '#3A424C');
+      setPaintSafe('highway_motorway_casing', 'line-color', '#0E1012');
+      setPaintSafe('highway_motorway_inner', 'line-color', '#6A7384');
+      setPaintSafe('highway_motorway_subtle', 'line-color', '#4A5464');
+      setPaintSafe('road_area_pier', 'fill-color', '#2A3038');
+      setPaintSafe('road_pier', 'line-color', '#3A424C');
+      setPaintSafe('railway', 'line-color', '#3A4048');
+      setPaintSafe('railway_dashline', 'line-color', '#4A5058');
+      setPaintSafe('railway_minor', 'line-color', '#323840');
+      setPaintSafe('railway_minor_dashline', 'line-color', '#424850');
+      setPaintSafe('railway_transit', 'line-color', '#3A4048');
+      setPaintSafe('railway_transit_dashline', 'line-color', '#4A5058');
+      setPaintSafe('aeroway-taxiway', 'line-color', '#3A424C');
+      setPaintSafe('aeroway-runway', 'line-color', '#4A5464');
+      setPaintSafe('aeroway-runway-casing', 'line-color', '#1A1C20');
+      setPaintSafe('aeroway-area', 'fill-color', '#1C2026');
+      setPaintSafe('boundary_state', 'line-color', '#4A5464');
+      setPaintSafe('boundary_country_z0-4', 'line-color', '#6A7384');
+      setPaintSafe('boundary_country_z5-', 'line-color', '#6A7384');
+    } catch (e) {}
+  }
+
+  /** Тёмная: весь текст светлый + тёмный halo (как белая тема наоборот). */
+  function tuneBasemapLabels(){
+    if (THEME_ID !== 'midnight') return;
+    try {
+      (map.getStyle().layers || []).forEach(function(l){
+        if (!l || l.type !== 'symbol') return;
+        if (String(l.id).indexOf('mapy_') === 0) return;
+        var id = String(l.id);
+        var isWater = /water/i.test(id);
+        try {
+          map.setPaintProperty(id, 'text-color', isWater ? '#C8D4E8' : '#E8ECF2');
+          map.setPaintProperty(id, 'text-halo-color', 'rgba(0,0,0,0.88)');
+          map.setPaintProperty(id, 'text-halo-width', isWater ? 1.35 : 1.15);
+          map.setPaintProperty(id, 'text-halo-blur', 0.25);
+        } catch (e) {}
+      });
+    } catch (e) {}
+  }
+
+  /** Гибрид (Liberty): синий текст рек на синей воде — тёмные буквы + белый halo. */
+  function tuneLibertyWaterLabels(){
+    if (THEME_ID !== 'aurora') return;
+    try {
+      (map.getStyle().layers || []).forEach(function(l){
+        if (!l || l.type !== 'symbol' || !l.id) return;
+        if (String(l.id).indexOf('mapy_') === 0) return;
+        if (!/water/i.test(String(l.id))) return;
+        setPaintSafe(l.id, 'text-color', '#1A3050');
+        setPaintSafe(l.id, 'text-halo-color', 'rgba(255,255,255,0.95)');
+        setPaintSafe(l.id, 'text-halo-width', 1.6);
+        setPaintSafe(l.id, 'text-halo-blur', 0.2);
+      });
+    } catch (e) {}
+  }
+
   function boostPois(){
     // Прячем все базовые POI стиля — рисуем только наши прореженные слои
     try {
@@ -1334,7 +1445,7 @@ function buildHtml(
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 2.6, 10, 3.2, 12, 3.8],
           'circle-color': OMT_CLASS_COLOR,
           'circle-stroke-width': 1.2,
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-color': MARKER_STROKE,
           'circle-opacity': [
             'interpolate', ['linear'], ['zoom'],
             8, 0,
@@ -1386,9 +1497,9 @@ function buildHtml(
             15, 0,
             15.4, 1
           ],
-          'text-color': '#2a2a2a',
-          'text-halo-color': '#ffffff',
-          'text-halo-width': 1.2,
+          'text-color': LABEL_INK,
+          'text-halo-color': LABEL_HALO,
+          'text-halo-width': LABEL_HALO_W,
           'icon-opacity-transition': { duration: 420 },
           'text-opacity-transition': { duration: 360 }
         }
@@ -1438,9 +1549,9 @@ function buildHtml(
             16, 0,
             16.35, 1
           ],
-          'text-color': '#2a2a2a',
-          'text-halo-color': '#ffffff',
-          'text-halo-width': 1.2,
+          'text-color': LABEL_INK,
+          'text-halo-color': LABEL_HALO,
+          'text-halo-width': LABEL_HALO_W,
           'icon-opacity-transition': { duration: 400 },
           'text-opacity-transition': { duration: 340 }
         }
@@ -1482,9 +1593,9 @@ function buildHtml(
             17, 0,
             17.3, 1
           ],
-          'text-color': '#333',
-          'text-halo-color': '#ffffff',
-          'text-halo-width': 1.1,
+          'text-color': LABEL_INK,
+          'text-halo-color': LABEL_HALO,
+          'text-halo-width': Math.max(0.9, LABEL_HALO_W - 0.1),
           'icon-opacity-transition': { duration: 380 },
           'text-opacity-transition': { duration: 320 }
         }
@@ -1502,7 +1613,7 @@ function buildHtml(
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 17, 2, 18, 3],
           'circle-color': OMT_CLASS_COLOR,
           'circle-stroke-width': 1,
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-color': MARKER_STROKE,
           'circle-opacity': [
             'interpolate', ['linear'], ['zoom'],
             17, 0,
@@ -1579,6 +1690,9 @@ function buildHtml(
   map.on('load', () => {
     mapReady = true;
     try { map.resize(); } catch (e) {}
+    tuneBasemapLabels();
+    tuneBasemapStructure();
+    tuneLibertyWaterLabels();
     boostPois();
     loadPlaceIcons().then(() => {
       ensurePlacesLayer();
@@ -2008,17 +2122,23 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
     [friends],
   );
 
-  const pins = useMemo(
-    () => ({
+  const pins = useMemo(() => {
+    // Гибрид (Liberty) — светлая подложка: тёмный ink/halo ломает подписи рек и POI
+    const darkMap = themeId === 'midnight';
+    return {
       friend: colors.pinFriend,
       me: colors.pinMe,
       place: colors.pinPlace,
       canvas: colors.mapCanvas,
       ink: colors.ink,
       surface: colors.surface,
-    }),
-    [colors],
-  );
+      labelInk: darkMap ? '#F2F5F8' : '#1A1A1A',
+      labelHalo: darkMap ? 'rgba(12,16,22,0.78)' : 'rgba(255,255,255,0.92)',
+      labelHaloW: darkMap ? 1.0 : 1.2,
+      markerStroke: darkMap ? 'rgba(18,22,28,0.92)' : '#ffffff',
+      darkMap,
+    };
+  }, [colors, themeId]);
 
   const html = useMemo(() => {
     const payload = {
@@ -2034,7 +2154,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, Props>(function MapCanvas(
   },
   // remount on theme; markers via updateMapyMap
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [themeId, pins.friend, pins.me, pins.place, pins.canvas, pins.ink, pins.surface]);
+  [themeId, pins.friend, pins.me, pins.place, pins.canvas, pins.labelInk, pins.labelHalo, pins.darkMap]);
 
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   useEffect(() => {

@@ -202,19 +202,22 @@ async def send_message(
     notify_body = (msg.body or "")[:120]
     if not notify_body and msg.attachments:
         notify_body = msg.attachments[0].kind
-    notify = {
-        "type": "notification",
-        "payload": {
-            "kind": "message",
-            "title": "Новое сообщение",
-            "body": notify_body,
+    chat_kind = await service.get_chat_kind(chat_id)
+    preference = "place_chat_activity" if chat_kind == "place" else "dm_enabled"
+    kind = "place_message" if chat_kind == "place" else "message"
+    title = "Чат места" if chat_kind == "place" else "Новое сообщение"
+    from infrastructure.notifications.push import deliver_app_notification
+
+    await deliver_app_notification(
+        [m for m in member_ids if m != user.id],
+        preference=preference,
+        kind=kind,
+        title=title,
+        body=notify_body or "Вложение",
+        data={
             "chat_id": str(msg.chat_id),
             "from_user_id": str(msg.author_id),
         },
-    }
-    await connection_manager.broadcast(
-        [m for m in member_ids if m != user.id],
-        notify,
     )
     return msg
 

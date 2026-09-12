@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { friendsApi } from '../../../src/shared/api/endpoints';
 import { formatApiError } from '../../../src/shared/api/errors';
 import { showError } from '../../../src/features/notifications/toast-store';
-import { Icon, Typography, createShadow, fonts, radii, space } from '../../../src/shared/ui';
+import { Icon, Typography, createShadow, fonts, radii, space, webScrollProps } from '../../../src/shared/ui';
 import { useTheme } from '../../../src/shared/ui/ThemeProvider';
 import { AppPage, useListContentStyle } from '../../../src/widgets/shell/AppPage';
 
@@ -64,6 +64,7 @@ export default function VisibilityScreen() {
   return (
     <AppPage fullBleed>
       <FlatList
+        {...webScrollProps}
         data={friendsQuery.data ?? []}
         keyExtractor={(i) => i.user_id}
         contentContainerStyle={listStyle}

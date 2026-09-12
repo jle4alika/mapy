@@ -28,7 +28,7 @@ import {
   friendPresenceClickable,
 } from '../../../src/features/presence/friendPresence';
 import { useGatewaySubscribe } from '../../../src/features/realtime/GatewayProvider';
-import { Avatar, Icon, Input, Typography, fonts, radii, space } from '../../../src/shared/ui';
+import { Avatar, Icon, Input, Typography, fonts, radii, space, webScrollProps } from '../../../src/shared/ui';
 import type { IconName } from '../../../src/shared/ui/Icon';
 import { useTheme } from '../../../src/shared/ui/ThemeProvider';
 import {
@@ -424,8 +424,10 @@ export default function ChatThreadScreen() {
   const handleSend = useCallback(() => {
     if (!canSend || sendingRef.current) return;
     sendingRef.current = true;
+    // Enter мог оставить хвостовой \n — убираем перед отправкой
+    const text = draft.replace(/\r?\n$/, '');
     sendMutation.mutate(
-      { text: draft, media: pending, replyToId: replyTo?.id },
+      { text, media: pending, replyToId: replyTo?.id },
       {
         onSettled: () => {
           sendingRef.current = false;
@@ -477,6 +479,7 @@ export default function ChatThreadScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <FlatList
+        {...webScrollProps}
         style={styles.listFlex}
         data={messages}
         keyExtractor={(item) => item.id}
@@ -675,6 +678,32 @@ export default function ChatThreadScreen() {
         <View style={[styles.composerInner, { maxWidth: maxW }]}>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="прикрепить файл"
+            onPress={pickAttachment}
+            style={styles.toolBtn}
+            hitSlop={6}
+          >
+            <Icon name="attach" pack="fi" size={22} color={colors.inkMuted} />
+          </Pressable>
+          <Input
+            containerStyle={styles.composerInputWrap}
+            style={styles.composerInput}
+            placeholder="Сообщение"
+            value={draft}
+            multiline
+            enterToSubmit
+            blurOnSubmit={false}
+            returnKeyType="send"
+            scrollEnabled
+            onChangeText={(t) => setDraft(chatId, t)}
+            onFocus={() => {
+              setEmojiOpen(false);
+              setReactPickerFor(null);
+            }}
+            onSubmitEditing={() => handleSend()}
+          />
+          <Pressable
+            accessibilityRole="button"
             accessibilityLabel="эмодзи"
             onPress={() => {
               setReactPickerFor(null);
@@ -690,46 +719,6 @@ export default function ChatThreadScreen() {
               color={emojiOpen ? colors.accent : colors.inkMuted}
             />
           </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="прикрепить файл"
-            onPress={pickAttachment}
-            style={styles.toolBtn}
-            hitSlop={6}
-          >
-            <Icon name="attach" pack="fi" size={22} color={colors.inkMuted} />
-          </Pressable>
-          <Input
-            containerStyle={styles.composerInputWrap}
-            style={styles.composerInput}
-            placeholder="Сообщение"
-            value={draft}
-            multiline
-            blurOnSubmit={false}
-            returnKeyType="send"
-            onChangeText={(t) => setDraft(chatId, t)}
-            onFocus={() => {
-              setEmojiOpen(false);
-              setReactPickerFor(null);
-            }}
-            onSubmitEditing={() => {
-              if (Platform.OS !== 'web') handleSend();
-            }}
-            // @ts-expect-error RN-web: Enter отправляет, Shift+Enter — новая строка
-            onKeyDown={(e) => {
-              const key = e?.key ?? e?.nativeEvent?.key;
-              if (key !== 'Enter') return;
-              if (e?.shiftKey || e?.nativeEvent?.shiftKey) return;
-              e?.preventDefault?.();
-              e?.nativeEvent?.preventDefault?.();
-              handleSend();
-            }}
-            onKeyPress={(e) => {
-              if (e.nativeEvent.key !== 'Enter') return;
-              if (Platform.OS === 'web') return;
-              handleSend();
-            }}
-          />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="отправить"
@@ -950,12 +939,13 @@ const styles = StyleSheet.create({
   },
   composerInput: {
     minHeight: 44,
-    maxHeight: 120,
+    maxHeight: 128,
     width: '100%',
-    borderRadius: radii.pill,
+    borderRadius: 22,
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 12 : 10,
     paddingBottom: Platform.OS === 'ios' ? 12 : 10,
+    lineHeight: 20,
   },
   send: {
     width: 44,

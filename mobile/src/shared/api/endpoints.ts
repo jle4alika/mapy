@@ -72,6 +72,19 @@ export const profileApi = {
       method: 'DELETE',
     });
   },
+  registerDevice(body: {
+    expo_push_token: string;
+    platform: 'ios' | 'android' | 'web' | 'unknown';
+    device_id?: string;
+  }) {
+    return apiRequest<{ id: string; platform: string; expo_push_token: string }>(
+      '/profile/devices',
+      { method: 'POST', body },
+    );
+  },
+  unregisterDevice(body: { expo_push_token?: string; device_id?: string }) {
+    return apiRequest<void>('/profile/devices', { method: 'DELETE', body });
+  },
 };
 
 export const friendsApi = {

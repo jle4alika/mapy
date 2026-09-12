@@ -1,6 +1,8 @@
 /**
  * Темы Mapy — строгий картографический UI.
- * day / midnight / contrast: синий акцент, нейтральные серые.
+ * day — светлая карта и меню.
+ * midnight — тёмная карта и тёмное меню; подписи без белой обводки.
+ * aurora (Контраст) — тёмная карта Liberty, меню как у day.
  */
 export type ThemeId = 'day' | 'midnight' | 'aurora';
 
@@ -52,8 +54,8 @@ const MAP_BLUE_SOFT = '#E8F0FF';
 export const THEMES: Record<ThemeId, ThemeColors> = {
   day: {
     id: 'day',
-    label: 'День',
-    description: 'Светлая карта',
+    label: 'Светлая',
+    description: 'Светлая карта и интерфейс',
     canvas: '#F1F2F4',
     surface: '#FFFFFF',
     surfaceMuted: '#EBEDF0',
@@ -93,8 +95,8 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
   },
   midnight: {
     id: 'midnight',
-    label: 'Ночь',
-    description: 'Тёмная карта',
+    label: 'Тёмная',
+    description: 'Тёмная карта и интерфейс',
     canvas: '#121212',
     surface: '#1E1E1E',
     surfaceMuted: '#2A2A2A',
@@ -132,31 +134,31 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
     cyanSoft: '#1A2A44',
     pinkSoft: '#3A2020',
   },
-  /** Бывшая «аврора» — спокойный контрастный тёмный режим без неона */
+  /** Контраст: карта Liberty, меню как у дневной */
   aurora: {
     id: 'aurora',
-    label: 'Контраст',
-    description: 'Тёмный контрастный',
-    canvas: '#0D0F12',
-    surface: '#171A1F',
-    surfaceMuted: '#22262C',
-    border: '#343A42',
-    ink: '#F7F8FA',
-    inkMuted: '#9AA3AD',
-    inkInverse: '#0D0F12',
-    accent: '#5B9CFF',
+    label: 'Гибрид',
+    description: 'Тёмная карта, светлое меню',
+    canvas: '#F1F2F4',
+    surface: '#FFFFFF',
+    surfaceMuted: '#EBEDF0',
+    border: '#E2E4E8',
+    ink: '#141416',
+    inkMuted: '#6E6E76',
+    inkInverse: '#FFFFFF',
+    accent: MAP_BLUE,
     accentText: '#FFFFFF',
-    accentSoft: '#182433',
-    cyan: '#5B9CFF',
-    pink: '#E57373',
-    danger: '#EF5350',
-    success: '#66BB6A',
-    tabBar: '#12151A',
-    tabInactive: '#7E8791',
-    shell: '#08090B',
-    overlay: 'rgba(0,0,0,0.6)',
+    accentSoft: MAP_BLUE_SOFT,
+    cyan: MAP_BLUE,
+    pink: '#C62828',
+    danger: '#C62828',
+    success: '#2E7D32',
+    tabBar: '#FFFFFF',
+    tabInactive: '#8A8A90',
+    shell: '#E6E8EC',
+    overlay: 'rgba(0,0,0,0.35)',
     pinFriend: '#EF5350',
-    pinMe: '#5B9CFF',
+    pinMe: MAP_BLUE,
     pinPlace: '#90A4AE',
     mapCanvas: '#0B0D10',
     marketingBg: '#000000',
@@ -167,12 +169,12 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
     black: '#000000',
     white: '#FFFFFF',
     yellow: '#F5C400',
-    gray1: '#22262C',
-    gray2: '#9AA3AD',
-    gray3: '#7E8791',
-    yellowSoft: '#2E2A18',
-    cyanSoft: '#182433',
-    pinkSoft: '#2E1A1A',
+    gray1: '#1A1A1A',
+    gray2: '#6E6E76',
+    gray3: '#8A8A90',
+    yellowSoft: '#FFF8E0',
+    cyanSoft: MAP_BLUE_SOFT,
+    pinkSoft: '#FDECEC',
   },
 };
 

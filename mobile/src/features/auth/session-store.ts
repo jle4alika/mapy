@@ -50,6 +50,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   },
   async logout() {
     try {
+      const { unregisterPushDevice } = await import('../notifications/push');
+      await unregisterPushDevice().catch(() => undefined);
       await clearAccessToken();
     } finally {
       const { clearPresenceCaches } = await import('../presence/offline-cache');

@@ -17,6 +17,7 @@ from infrastructure.postgres.engine import get_direct_database_url
 
 # Импорт всех ORM-моделей в metadata
 from domains.users.infrastructure.models import (  # noqa: F401
+    UserDeviceModel,
     UserModel,
     UserNotificationSettingsModel,
     UserPrivacySettingsModel,

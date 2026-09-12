@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
 
 export type AppNotification = {
   id: string;
@@ -38,16 +39,14 @@ export const useNotificationStore = create<State>((set, get) => ({
     const items = [item, ...get().items].slice(0, 80);
     set({ items, unread: items.filter((x) => !x.read).length });
 
-    // Web Notification API (если разрешено)
-    if (typeof window !== 'undefined' && 'Notification' in window) {
+    // Web: только если уже granted (запрос разрешения — через registerPushDevice / профиль)
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'granted') {
         try {
           new Notification(item.title, { body: item.body, tag: item.id });
         } catch {
           // ignore
         }
-      } else if (Notification.permission === 'default') {
-        void Notification.requestPermission();
       }
     }
   },

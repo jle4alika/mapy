@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, Switch, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -6,7 +6,12 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { profileApi } from '../../../src/shared/api/endpoints';
 import { formatApiError } from '../../../src/shared/api/errors';
-import { showError } from '../../../src/features/notifications/toast-store';
+import { showError, showToast } from '../../../src/features/notifications/toast-store';
+import {
+  getPushPermissionStatus,
+  registerPushDevice,
+  type PushPermissionStatus,
+} from '../../../src/features/notifications/push';
 import { useSessionStore } from '../../../src/features/auth/session-store';
 import { useNotificationStore } from '../../../src/features/notifications/notification-store';
 import {
@@ -37,6 +42,38 @@ export default function ProfileScreen() {
   const [error, setError] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [addFriendsOpen, setAddFriendsOpen] = useState(false);
+  const [pushStatus, setPushStatus] = useState<PushPermissionStatus>('undetermined');
+  const [pushBusy, setPushBusy] = useState(false);
+
+  useEffect(() => {
+    markAllRead();
+  }, [markAllRead]);
+
+  useEffect(() => {
+    void getPushPermissionStatus().then(setPushStatus);
+  }, []);
+
+  const enablePush = useCallback(async () => {
+    setPushBusy(true);
+    try {
+      const res = await registerPushDevice();
+      setPushStatus(res.status);
+      if (res.status === 'granted') {
+        showToast('Уведомления', res.token ? 'Пуши включены' : 'Разрешение получено', 'success');
+      } else if (res.status === 'denied') {
+        showError(
+          new Error('Разрешение отклонено. Включите уведомления в настройках системы.'),
+          'Нет доступа',
+        );
+      } else if (res.status === 'unavailable') {
+        showError(new Error('Уведомления недоступны в этой среде'), 'Пуши');
+      }
+    } catch (e) {
+      showError(e, 'Не удалось включить пуши');
+    } finally {
+      setPushBusy(false);
+    }
+  }, []);
 
   useEffect(() => {
     markAllRead();
@@ -123,6 +160,19 @@ export default function ProfileScreen() {
 
       <View style={[styles.section, createShadow('soft'), { backgroundColor: colors.surface }]}>
         <Typography variant="bodyMedium" color={colors.ink} style={styles.sectionLabel}>
+          Профиль
+        </Typography>
+        <Input label="Статус" value={status} onChangeText={setStatus} />
+        <Button
+          title="Сохранить статус"
+          icon="check"
+          onPress={() => saveStatus.mutate()}
+          loading={saveStatus.isPending}
+        />
+      </View>
+
+      <View style={[styles.section, createShadow('soft'), { backgroundColor: colors.surface }]}>
+        <Typography variant="bodyMedium" color={colors.ink} style={styles.sectionLabel}>
           Тема
         </Typography>
         <ThemeSwitcher />
@@ -132,19 +182,6 @@ export default function ProfileScreen() {
         <AddFriendsPanel
           expanded={addFriendsOpen}
           onToggle={() => setAddFriendsOpen((v) => !v)}
-        />
-      </View>
-
-      <View style={[styles.section, createShadow('soft'), { backgroundColor: colors.surface }]}>
-        <Typography variant="bodyMedium" color={colors.ink} style={styles.sectionLabel}>
-          Профиль
-        </Typography>
-        <Input label="Статус" value={status} onChangeText={setStatus} />
-        <Button
-          title="Сохранить статус"
-          icon="check"
-          onPress={() => saveStatus.mutate()}
-          loading={saveStatus.isPending}
         />
       </View>
 
@@ -207,10 +244,45 @@ export default function ProfileScreen() {
 
       <View style={[styles.section, createShadow('soft'), { backgroundColor: colors.surface }]}>
         <View style={styles.sectionTitle}>
-          <Icon name="settings" pack="fi" size={16} color={colors.accent} />
+          <Icon name="bell" pack="fi" size={16} color={colors.accent} />
           <Typography variant="bodyMedium" color={colors.ink}>
             Пуши
           </Typography>
+        </View>
+        <View style={[styles.switchRow, { borderBottomColor: colors.border }]}>
+          <View style={{ flex: 1, gap: 2, paddingRight: 12 }}>
+            <Typography color={colors.ink}>Разрешение системы</Typography>
+            <Typography variant="caption" color={colors.inkMuted}>
+              {pushStatus === 'granted'
+                ? 'Разрешено — уведомления будут приходить'
+                : pushStatus === 'denied'
+                  ? 'Запрещено — включите в настройках телефона / браузера'
+                  : pushStatus === 'unavailable'
+                    ? 'Недоступно в этой среде'
+                    : 'Ещё не запрашивали'}
+            </Typography>
+          </View>
+          {pushStatus !== 'granted' ? (
+            <Pressable
+              onPress={enablePush}
+              disabled={pushBusy || pushStatus === 'unavailable'}
+              style={({ pressed }) => [
+                {
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: radii.pill,
+                  backgroundColor: colors.accent,
+                  opacity: pushBusy || pushStatus === 'unavailable' ? 0.45 : pressed ? 0.88 : 1,
+                },
+              ]}
+            >
+              <Typography color={colors.accentText} style={{ fontSize: 13 }}>
+                {pushBusy ? '…' : 'Включить'}
+              </Typography>
+            </Pressable>
+          ) : (
+            <Icon name="check" pack="fi" size={18} color={colors.success} />
+          )}
         </View>
         {notifQuery.data
           ? (
@@ -231,6 +303,9 @@ export default function ProfileScreen() {
                   trackColor={{ false: colors.surfaceMuted, true: colors.accentSoft }}
                   thumbColor={colors.surface}
                   onValueChange={async (v) => {
+                    if (v && pushStatus !== 'granted') {
+                      await enablePush();
+                    }
                     await profileApi.putNotifications({ [key]: v });
                     qc.invalidateQueries({ queryKey: ['notifications'] });
                   }}

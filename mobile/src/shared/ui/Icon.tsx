@@ -37,6 +37,9 @@ import {
   FiStar,
   FiSmile,
   FiShare2,
+  FiSun,
+  FiMoon,
+  FiLayers,
 } from 'react-icons/fi';
 import { LuFuel, LuTrees, LuTrainFront } from 'react-icons/lu';
 import {
@@ -74,6 +77,9 @@ import {
   HiOutlineStar,
   HiOutlineFaceSmile,
   HiOutlineShare,
+  HiOutlineSun,
+  HiOutlineMoon,
+  HiOutlineSquare2Stack,
 } from 'react-icons/hi2';
 import { Feather, Ionicons } from '@expo/vector-icons';
 
@@ -118,7 +124,10 @@ export type IconName =
   | 'attach'
   | 'star'
   | 'smile'
-  | 'share';
+  | 'share'
+  | 'sun'
+  | 'moon'
+  | 'layers';
 
 export type IconPack = 'fi' | 'hi';
 
@@ -169,6 +178,9 @@ const FI_WEB: Record<IconName, IconType> = {
   star: FiStar,
   smile: FiSmile,
   share: FiShare2,
+  sun: FiSun,
+  moon: FiMoon,
+  layers: FiLayers,
 };
 
 const HI_WEB: Record<IconName, IconType> = {
@@ -210,6 +222,9 @@ const HI_WEB: Record<IconName, IconType> = {
   star: HiOutlineStar,
   smile: HiOutlineFaceSmile,
   share: HiOutlineShare,
+  sun: HiOutlineSun,
+  moon: HiOutlineMoon,
+  layers: HiOutlineSquare2Stack,
 };
 
 const FI_NATIVE: Record<IconName, React.ComponentProps<typeof Feather>['name']> = {
@@ -251,6 +266,9 @@ const FI_NATIVE: Record<IconName, React.ComponentProps<typeof Feather>['name']> 
   star: 'star',
   smile: 'smile',
   share: 'share-2',
+  sun: 'sun',
+  moon: 'moon',
+  layers: 'layers',
 };
 
 const HI_NATIVE: Record<IconName, React.ComponentProps<typeof Ionicons>['name']> = {
@@ -292,6 +310,9 @@ const HI_NATIVE: Record<IconName, React.ComponentProps<typeof Ionicons>['name']>
   star: 'star-outline',
   smile: 'happy-outline',
   share: 'share-outline',
+  sun: 'sunny-outline',
+  moon: 'moon-outline',
+  layers: 'layers-outline',
 };
 
 export function Icon({ name, pack = 'fi', size = 22, color = '#000', style }: Props) {

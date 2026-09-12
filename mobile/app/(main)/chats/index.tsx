@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 
 import { chatsApi } from '../../../src/shared/api/endpoints';
-import { Icon, Typography, createShadow, radii, space } from '../../../src/shared/ui';
+import { Icon, Typography, createShadow, radii, space, webScrollProps } from '../../../src/shared/ui';
 import { useTheme } from '../../../src/shared/ui/ThemeProvider';
 import { AppPage, useListContentStyle } from '../../../src/widgets/shell/AppPage';
 
@@ -23,6 +23,7 @@ export default function ChatsListScreen() {
   return (
     <AppPage fullBleed>
       <FlatList
+        {...webScrollProps}
         data={data}
         keyExtractor={(item) => item.id}
         refreshing={isRefetching}

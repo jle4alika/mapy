@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { Platform, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -18,6 +18,10 @@ type Props = {
   dark?: boolean;
   edges?: ('top' | 'right' | 'bottom' | 'left')[];
 };
+
+/** Web: класс для кастомных скроллбаров (+html.tsx) */
+export const webScrollProps =
+  Platform.OS === 'web' ? ({ className: 'mapy-scroll' } as Record<string, string>) : {};
 
 export function Screen({
   children,
@@ -48,6 +52,7 @@ export function Screen({
 
   const content = scroll ? (
     <ScrollView
+      {...webScrollProps}
       contentContainerStyle={contentStyle}
       keyboardShouldPersistTaps="handled"
       style={{ backgroundColor: bg }}

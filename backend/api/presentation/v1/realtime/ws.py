@@ -146,6 +146,30 @@ async def _handle_message_send(user_id: uuid.UUID, payload: dict[str, Any]) -> d
     }
     member_ids = await _member_user_ids(chat_id)
     await connection_manager.broadcast(member_ids, frame)
+
+    async with session_maker() as session:
+        service = ChatsService(
+            ChatsUnitOfWork(session),
+            FriendsUnitOfWork(session),
+            PlacesUnitOfWork(session),
+        )
+        chat_kind = await service.get_chat_kind(chat_id)
+    preference = "place_chat_activity" if chat_kind == "place" else "dm_enabled"
+    kind = "place_message" if chat_kind == "place" else "message"
+    title = "Чат места" if chat_kind == "place" else "Новое сообщение"
+    from infrastructure.notifications.push import deliver_app_notification
+
+    await deliver_app_notification(
+        [m for m in member_ids if m != user_id],
+        preference=preference,
+        kind=kind,
+        title=title,
+        body=(msg.body or "Вложение")[:120],
+        data={
+            "chat_id": str(msg.chat_id),
+            "from_user_id": str(msg.author_id),
+        },
+    )
     return {
         "ok": True,
         "id": str(msg.id),

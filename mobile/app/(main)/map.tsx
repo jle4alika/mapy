@@ -183,7 +183,7 @@ function MapMobileScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.mapCanvas }]}>
-      <StatusBar style={colors.id === 'day' ? 'dark' : 'light'} />
+      <StatusBar style={colors.id === 'midnight' ? 'light' : 'dark'} />
       <MapCanvas
         ref={mapRef}
         center={center}

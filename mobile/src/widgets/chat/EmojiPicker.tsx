@@ -14,7 +14,7 @@ import {
   TELEGRAM_EMOJI_CATEGORIES,
   TELEGRAM_QUICK_REACTIONS,
 } from '../../features/chat/telegramEmojis';
-import { Icon, Typography, fonts, radii, space } from '../../shared/ui';
+import { Icon, Typography, fonts, radii, space, webScrollProps } from '../../shared/ui';
 import { useTheme } from '../../shared/ui/ThemeProvider';
 
 type Props = {
@@ -70,6 +70,7 @@ export function EmojiPicker({ visible, mode = 'compose', onClose, onPick }: Prop
 
       {mode === 'react' ? (
         <ScrollView
+          {...webScrollProps}
           style={{ flex: 1 }}
           contentContainerStyle={[styles.grid, { paddingBottom: space.sm }]}
           keyboardShouldPersistTaps="handled"
@@ -114,6 +115,7 @@ export function EmojiPicker({ visible, mode = 'compose', onClose, onPick }: Prop
           </ScrollView>
 
           <ScrollView
+            {...webScrollProps}
             style={{ flex: 1 }}
             contentContainerStyle={[styles.grid, { paddingBottom: space.sm }]}
             keyboardShouldPersistTaps="handled"
