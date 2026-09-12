@@ -19,7 +19,6 @@ COPY pyproject.toml poetry.lock ./
 COPY api ./api
 
 RUN poetry install --only main --no-ansi --no-root \
-    && poetry install --only main --no-ansi \
     && rm -rf "$POETRY_CACHE_DIR"
 
 
@@ -27,7 +26,8 @@ FROM python:3.12-slim-bookworm AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH="/app/.venv/bin:$PATH"
+    PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/api"
 
 WORKDIR /app
 
