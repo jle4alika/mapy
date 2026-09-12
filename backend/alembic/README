@@ -1,0 +1,8 @@
+Alembic migrations (из корня репозитория):
+
+  make migrate
+  make revision msg="description"
+  make migrate-down
+  make current
+
+Или: poetry run alembic -c backend/alembic.ini upgrade head

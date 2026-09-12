@@ -1,0 +1,14 @@
+# Redis
+#
+# Standalone:
+#   docker compose --env-file backend/.env -f backend/deploy/services/redis.yml up -d
+
+services:
+  redis_container:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

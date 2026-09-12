@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.import_linter_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Env
+.env
+
+# SQLite
+*.sqlite
+*.sqlite3
+
+# IDE
+.idea/
+
+# Uploads
+uploads/

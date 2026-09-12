@@ -1,0 +1,186 @@
+[project]
+name = "blink20"
+version = "0.1.0"
+description = "Blink20: друзья на карте в реальном времени и чаты по местам"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+license = { text = "MIT" }
+authors = [
+    { name = "Aleksandr Naraev", email = "alex.naraev@yandex.ru" },
+]
+maintainers = [
+    { name = "Aleksandr Naraev (jle4alika)", email = "alex.naraev@yandex.ru" },
+]
+keywords = [
+    "fastapi",
+    "sqlalchemy",
+    "geolocation",
+    "chat",
+    "postgis",
+    "websocket",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Typing :: Typed",
+]
+dependencies = [
+    "fastapi (>=0.115.0,<1)",
+    "uvicorn[standard] (>=0.32.0,<1)",
+    "python-multipart (>=0.0.9)",
+    "sqlalchemy[asyncio] (>=2.0.36,<3)",
+    "asyncpg (>=0.30.0)",
+    "alembic (>=1.14.0)",
+    "fastapi-users[sqlalchemy] (>=13,<14)",
+    "email-validator (>=2.0)",
+    "redis (>=5.2.0)",
+    "passlib[bcrypt] (>=1.7.4)",
+    "pydantic[email] (>=2.10.0)",
+    "pydantic-settings (>=2.6.0)",
+    "structlog (>=24.4.0)",
+    "pika (>=1.3.2)",
+    "aio-pika (>=9.4.0)",
+    "celery[redis] (>=5.4,<6)",
+    "prometheus-fastapi-instrumentator (>=7.0.0)",
+    "fastapi-cache2 (>=0.2.2)",
+    "pyrate-limiter (>=3.7.0)",
+    "jinja2 (>=3.1.6,<4.0.0)",
+    "geoalchemy2 (>=0.15.0)",
+]
+
+[project.urls]
+Homepage = "https://github.com/jle4alika/my-fastapi-base-architecture"
+Repository = "https://github.com/jle4alika/my-fastapi-base-architecture"
+Issues = "https://github.com/jle4alika/my-fastapi-base-architecture/issues"
+Changelog = "https://github.com/jle4alika/my-fastapi-base-architecture/blob/main/backend/CHANGELOG.md"
+
+[tool.poetry]
+packages = [
+    { include = "api" },
+    { include = "common", from = "api" },
+    { include = "core", from = "api" },
+    { include = "domains", from = "api" },
+    { include = "infrastructure", from = "api" },
+    { include = "presentation", from = "api" },
+]
+exclude = [
+    "deploy",
+    "tests",
+    "**/__pycache__",
+]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.3.0"
+pytest-asyncio = ">=0.24.0"
+httpx = ">=0.28.0"
+black = ">=24.10.0"
+pytest-cov = ">=6.0.0"
+polyfactory = ">=2.18.0"
+import-linter = ">=2.1"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = [".", "api"]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.importlinter]
+root_packages = [
+    "presentation",
+    "domains",
+    "infrastructure",
+    "common",
+    "core",
+]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Domain has no framework/infra/HTTP"
+type = "forbidden"
+source_modules = [
+    "domains.users.domain",
+    "domains.friends.domain",
+    "domains.location.domain",
+    "domains.places.domain",
+    "domains.chats.domain",
+    "domains.map_packs.domain",
+]
+forbidden_modules = [
+    "infrastructure",
+    "presentation",
+    "fastapi",
+    "sqlalchemy",
+    "fastapi_users",
+    "geoalchemy2",
+]
+
+[[tool.importlinter.contracts]]
+name = "Application has no HTTP/SQLAlchemy/ACL"
+type = "forbidden"
+source_modules = [
+    "domains.users.application",
+    "domains.friends.application",
+    "domains.location.application",
+    "domains.places.application",
+    "domains.chats.application",
+    "domains.map_packs.application",
+]
+forbidden_modules = [
+    "infrastructure",
+    "presentation",
+    "fastapi",
+    "sqlalchemy",
+    "fastapi_users",
+    "geoalchemy2",
+]
+
+[[tool.importlinter.contracts]]
+name = "Common is shared kernel (no domains/infra/presentation)"
+type = "forbidden"
+source_modules = [
+    "common",
+]
+forbidden_modules = [
+    "domains",
+    "infrastructure",
+    "presentation",
+]
+
+[[tool.importlinter.contracts]]
+name = "Global infrastructure does not import domains or presentation"
+type = "forbidden"
+source_modules = [
+    "infrastructure",
+]
+forbidden_modules = [
+    "domains",
+    "presentation",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.venv
+  | dist
+  | build
+  | alembic/versions
+)/
+'''
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,78 @@
+# Prod: полный стек
+#
+#   docker compose --env-file .env -f deploy/compose.prod.yml up --build -d
+#
+# Публично ТОЛЬКО nginx :80
+#   API          → http://host/
+#   Grafana      → http://host/grafana/
+# Postgres на хост — только 127.0.0.1 (миграции с сервера).
+
+name: fastapi-architecture
+
+include:
+  - path: services/postgres.yml
+  - path: services/redis.yml
+  - path: services/rabbitmq.yml
+  - path: services/app.yml
+  - path: services/nginx.yml
+  - path: services/monitoring.yml
+
+x-app-env: &app-env
+  DB_HOST: pgbouncer
+  DB_PORT: "5432"
+  DB_DIRECT_HOST: db
+  DB_DIRECT_PORT: "5432"
+  DB_USE_PGBOUNCER: "true"
+  REDIS_HOST: redis_container
+  REDIS_OPTIONAL: "false"
+  RMQ_HOST: rabbitmq
+  ENVIRONMENT: production
+  TRUST_PROXY_HEADERS: "true"
+
+services:
+  db:
+    # Не публикуем в LAN/интернет — только localhost хоста
+    ports:
+      - "127.0.0.1:${POSTGRES_PUBLISHED_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./configs/postgres/postgres.prod.conf:/etc/postgresql/postgresql.conf:ro
+      - ./configs/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/etc/postgresql/postgresql.conf",
+        "-c",
+        "hba_file=/etc/postgresql/pg_hba.conf",
+      ]
+
+  redis_container:
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  api:
+    environment:
+      <<: *app-env
+    command: >
+      uvicorn api.app:app
+      --host 0.0.0.0 --port 8000
+      --proxy-headers --forwarded-allow-ips="*"
+      --workers ${API_WORKERS:-4}
+
+  consumers:
+    environment:
+      <<: *app-env
+
+  celery_worker:
+    # профиль celery — в services/app.yml; включение: COMPOSE_PROFILES=celery
+    environment:
+      <<: *app-env
+
+  nginx:
+    volumes:
+      - ./configs/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  redis_data:

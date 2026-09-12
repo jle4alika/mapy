@@ -1,0 +1,485 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.6173,
+          55.7558
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-gas-1",
+        "name": "АЗС Центр",
+        "place_type": "gas_station",
+        "address": "Тверская ул., Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.62,
+          55.75
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-cafe-1",
+        "name": "Кафе Пушкин",
+        "place_type": "cafe",
+        "address": "Тверской бульвар, Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.601,
+          55.7415
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-cafe-2",
+        "name": "Кофейня Парк",
+        "place_type": "cafe",
+        "address": "ул. Крымский Вал, Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.654,
+          55.776
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-gas-2",
+        "name": "АЗС Сокольники",
+        "place_type": "gas_station",
+        "address": "Сокольническая пл., Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.588,
+          55.733
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-cafe-3",
+        "name": "Кафе Лужники",
+        "place_type": "cafe",
+        "address": "Лужнецкая наб., Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.635,
+          55.752
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-shop-1",
+        "name": "Магазин Китай-город",
+        "place_type": "shop",
+        "address": "ул. Маросейка, Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.605,
+          55.763
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-metro-1",
+        "name": "Метро Тверская",
+        "place_type": "transit",
+        "address": "Пушкинская пл., Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.642,
+          55.7585
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-cafe-4",
+        "name": "Кофе на Чистых",
+        "place_type": "cafe",
+        "address": "Чистопрудный бул., Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.595,
+          55.748
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-gas-3",
+        "name": "АЗС Арбат",
+        "place_type": "gas_station",
+        "address": "Новый Арбат, Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.628,
+          55.74
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-park-1",
+        "name": "Зарядье",
+        "place_type": "park",
+        "address": "ул. Варварка, Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.61,
+          55.77
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-cafe-5",
+        "name": "Кафе Самотёка",
+        "place_type": "cafe",
+        "address": "Самотёчная ул., Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.57,
+          55.76
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-shop-2",
+        "name": "Пресня Маркет",
+        "place_type": "shop",
+        "address": "Красная Пресня, Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.66,
+          55.75
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-gas-4",
+        "name": "АЗС Таганка",
+        "place_type": "gas_station",
+        "address": "Таганская пл., Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.58,
+          55.78
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-metro-2",
+        "name": "Метро Белорусская",
+        "place_type": "transit",
+        "address": "Тверская Застава, Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.64,
+          55.73
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-cafe-6",
+        "name": "Кофе Павелецкая",
+        "place_type": "cafe",
+        "address": "Павелецкая пл., Москва"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.6184,
+          55.7512
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-1",
+        "name": "Кафе Охотный",
+        "place_type": "cafe",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.6155,
+          55.7535
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-2",
+        "name": "ГУм шоп",
+        "place_type": "shop",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.621,
+          55.749
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-3",
+        "name": "Кофе Замоскворечье",
+        "place_type": "cafe",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.612,
+          55.755
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-4",
+        "name": "Метро Александровский сад",
+        "place_type": "transit",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.624,
+          55.7525
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-5",
+        "name": "АЗС Лубянка",
+        "place_type": "gas_station",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.609,
+          55.75
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-6",
+        "name": "Александровский сад",
+        "place_type": "park",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.63,
+          55.756
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-7",
+        "name": "Кафе Мясницкая",
+        "place_type": "cafe",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.6,
+          55.757
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-8",
+        "name": "Магазин Арбатская",
+        "place_type": "shop",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.64,
+          55.748
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-9",
+        "name": "Кофе Яуза",
+        "place_type": "cafe",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.625,
+          55.76
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-10",
+        "name": "Цветной маркет",
+        "place_type": "shop",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.605,
+          55.745
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-11",
+        "name": "АЗС Кропоткинская",
+        "place_type": "gas_station",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.635,
+          55.765
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-12",
+        "name": "Метро Чистые пруды",
+        "place_type": "transit",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.59,
+          55.755
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-13",
+        "name": "Кафе Новый Арбат",
+        "place_type": "cafe",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.65,
+          55.755
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-14",
+        "name": "Парк Горького восток",
+        "place_type": "park",
+        "address": "Москва, центр"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.615,
+          55.765
+        ]
+      },
+      "properties": {
+        "osm_id": "demo-dense-15",
+        "name": "Кофее Страстной",
+        "place_type": "cafe",
+        "address": "Москва, центр"
+      }
+    }
+  ]
+}

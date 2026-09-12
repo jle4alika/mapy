@@ -1,0 +1,16 @@
+# Контекст сборки — корень шаблона (эта папка).
+.git
+.idea
+.venv
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.md
+.env
+.env.*
+deploy
+uploads
+*.sqlite
+*.sqlite3

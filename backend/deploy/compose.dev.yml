@@ -1,0 +1,82 @@
+# Dev: полный стек (infra + api + nginx + monitoring)
+#
+#   docker compose --env-file .env -f deploy/compose.dev.yml up --build -d
+#
+# Публично ТОЛЬКО nginx :80
+#   API / docs   → http://localhost/
+#   Grafana      → http://localhost/grafana/
+#
+# Для локального uvicorn без Docker API — см. compose.infra.yml (порты на 127.0.0.1).
+
+name: fastapi-architecture-dev
+
+include:
+  - path: services/postgres.yml
+  - path: services/redis.yml
+  - path: services/rabbitmq.yml
+  - path: services/app.yml
+  - path: services/nginx.yml
+  - path: services/monitoring.yml
+
+x-app-env: &app-env
+  DB_HOST: pgbouncer
+  DB_PORT: "5432"
+  DB_DIRECT_HOST: db
+  DB_DIRECT_PORT: "5432"
+  DB_USE_PGBOUNCER: "true"
+  REDIS_HOST: redis_container
+  REDIS_OPTIONAL: "false"
+  RMQ_HOST: rabbitmq
+  ENVIRONMENT: development
+  TRUST_PROXY_HEADERS: "true"
+  # Hot-reload: common/core/domains с хоста (site-packages из образа иначе stale)
+  PYTHONPATH: /app:/app/api
+
+services:
+  db:
+    # только localhost — не торчит в сеть
+    ports:
+      - "127.0.0.1:${POSTGRES_PUBLISHED_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./configs/postgres/postgres.dev.conf:/etc/postgresql/postgresql.conf:ro
+      - ./configs/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/etc/postgresql/postgresql.conf",
+        "-c",
+        "hba_file=/etc/postgresql/pg_hba.conf",
+      ]
+
+  # pgbouncer / redis / rabbitmq — без ports (только docker-сеть)
+  # API без ports — только через nginx
+
+  api:
+    environment:
+      <<: *app-env
+    command: >
+      uvicorn api.app:app
+      --host 0.0.0.0 --port 8000
+      --reload
+      --proxy-headers --forwarded-allow-ips="*"
+    volumes:
+      - ../api:/app/api
+
+  consumers:
+    environment:
+      <<: *app-env
+    volumes:
+      - ../api:/app/api
+
+  celery_worker:
+    # профиль celery задан в services/app.yml
+    environment:
+      <<: *app-env
+    volumes:
+      - ../api:/app/api
+
+  nginx:
+    volumes:
+      - ./configs/nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro

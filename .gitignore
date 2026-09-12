@@ -1,0 +1,38 @@
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies & builds
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+dist/
+build/
+.expo/
+web-build/
+*.egg-info/
+
+# Caches / coverage
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.tsbuildinfo
+
+# Local media / uploads
+backend/storage/
+uploads/
+
+# Native (generated)
+mobile/ios/
+mobile/android/

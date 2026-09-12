@@ -1,0 +1,60 @@
+# Postgres + PgBouncer
+#
+# Standalone:
+#   docker compose --env-file backend/.env -f backend/deploy/services/postgres.yml up -d
+
+services:
+  db:
+    image: ${POSTGRES_IMAGE:-postgis/postgis:16-3.4}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      AUTH_TYPE: scram-sha-256
+      POOL_MODE: ${PB_POOL_MODE:-transaction}
+      MAX_CLIENT_CONN: ${PB_MAX_CLIENTS:-2000}
+      DEFAULT_POOL_SIZE: ${PB_DEFAULT_POOL_SIZE:-50}
+      MIN_POOL_SIZE: ${PB_MIN_POOL_SIZE:-10}
+      RESERVE_POOL_SIZE: ${PB_RESERVE_POOL_SIZE:-25}
+      RESERVE_POOL_TIMEOUT: 3
+      SERVER_RESET_QUERY: DISCARD ALL
+      MAX_DB_CONNECTIONS: ${PB_MAX_DB_CONNECTIONS:-100}
+      LOG_CONNECTIONS: 0
+      LOG_DISCONNECTIONS: 0
+      LISTEN_PORT: "5432"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "PGPASSWORD=\"$$DB_PASSWORD\" psql -h 127.0.0.1 -p 5432 -U \"$$DB_USER\" -d \"$$DB_NAME\" -c 'SELECT 1' >/dev/null",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+
+volumes:
+  postgres_data:

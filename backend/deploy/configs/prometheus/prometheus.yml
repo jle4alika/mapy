@@ -1,0 +1,30 @@
+# Prometheus scrape config.
+# Celery exporter: job всегда объявлен; target UP только при COMPOSE_PROFILES=celery.
+
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: fastapi
+    scrape_interval: 10s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api:8000"]
+        labels:
+          service: api
+
+  # https://github.com/danihodovic/celery-exporter
+  # Без профиля celery будет DOWN — это нормально для шаблона.
+  - job_name: celery-exporter
+    scrape_interval: 10s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["celery_exporter:9808"]
+        labels:
+          service: celery

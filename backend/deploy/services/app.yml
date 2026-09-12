@@ -1,0 +1,96 @@
+# FastAPI app + Celery + aio-pika consumers
+#
+# Обычно поднимается через compose.dev.yml / compose.prod.yml вместе с infra.
+# Env (DB_HOST, REDIS_HOST, …) задаётся в тех же файлах.
+
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    working_dir: /app
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+      redis_container:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  consumers:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    working_dir: /app
+    command: python -m infrastructure.rabbitmq.run_all_consumers
+    depends_on:
+      db:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  celery_worker:
+    profiles: ["celery"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    working_dir: /app
+    command: >
+      celery -A infrastructure.celery_workers.celery_app:celery_app
+      worker --loglevel=INFO -E --concurrency=${CELERY_WORKER_CONCURRENCY:-2}
+    depends_on:
+      db:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis_container:
+        condition: service_healthy
+
+  celery_beat:
+    profiles: ["celery"]
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    working_dir: /app
+    command: >
+      celery -A infrastructure.celery_workers.celery_app:celery_app
+      beat --loglevel=INFO
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis_container:
+        condition: service_healthy

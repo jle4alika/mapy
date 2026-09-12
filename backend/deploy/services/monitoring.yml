@@ -1,0 +1,75 @@
+# Prometheus + Grafana (+ опционально Celery exporter)
+#
+# Celery: профиль compose `celery` (COMPOSE_PROFILES=celery / make up-*-celery).
+# Порты наружу НЕ публикуем — доступ только через nginx (/grafana/).
+
+services:
+  celery_exporter:
+    profiles: ["celery"]
+    image: danihodovic/celery-exporter:0.12.2
+    restart: unless-stopped
+    environment:
+      CE_BROKER_URL: amqp://${RMQ_LOGIN:-guest}:${RMQ_PASS:-guest}@rabbitmq:5672//
+      CE_RETRY_INTERVAL: "5"
+      CE_BUCKETS: "0.1,0.5,1,2.5,5,10,30,60,300,600,1800"
+    expose:
+      - "9808"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      celery_worker:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9808/health', timeout=3)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 25s
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    restart: unless-stopped
+    volumes:
+      - ../configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    expose:
+      - "9090"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/core/fastapi-observability.json
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost/grafana/}
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN:-localhost}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../configs/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../configs/grafana/dashboards/core:/var/lib/grafana/dashboards/core:ro
+      - ../configs/grafana/dashboards/celery:/var/lib/grafana/dashboards/celery:ro
+    expose:
+      - "3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:

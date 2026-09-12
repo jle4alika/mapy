@@ -1,0 +1,44 @@
+# Только инфраструктура — для локального uvicorn / pytest на хосте.
+#
+#   make infra
+#   poetry run uvicorn api.app:app --reload --port 8000
+#
+# Порты только на 127.0.0.1 (не доступны из LAN/интернета).
+
+name: blink20-infra
+
+include:
+  - path: services/postgres.yml
+  - path: services/redis.yml
+  - path: services/rabbitmq.yml
+
+services:
+  db:
+    ports:
+      - "127.0.0.1:${POSTGRES_PUBLISHED_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./configs/postgres/postgres.dev.conf:/etc/postgresql/postgresql.conf:ro
+      - ./configs/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/etc/postgresql/postgresql.conf",
+        "-c",
+        "hba_file=/etc/postgresql/pg_hba.conf",
+      ]
+
+  pgbouncer:
+    ports:
+      - "127.0.0.1:${PGBOUNCER_PORT:-6432}:5432"
+
+  redis_container:
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+
+  rabbitmq:
+    ports:
+      - "127.0.0.1:${RMQ_PORT:-5672}:5672"
+      # management UI тоже только localhost
+      - "127.0.0.1:${RMQ_MANAGEMENT_PORT:-15672}:15672"
