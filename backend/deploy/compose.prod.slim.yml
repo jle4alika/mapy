@@ -83,7 +83,7 @@ services:
       web:
         condition: service_completed_successfully
     volumes:
-      - ./configs/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./configs/nginx/nginx.prod.slim.conf:/etc/nginx/nginx.conf:ro
       - web_static:/usr/share/nginx/html:ro
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/nginx-health"]
